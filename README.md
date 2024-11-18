@@ -27,6 +27,4 @@ Update service and device implementations can be added to `embedded-update` when
 
 # Minimum supported Rust version (MSRV)
 
-`embedded-update` requires a feature from `nightly` to compile when using the `nightly` flag.
-
 * async_fn_in_traits

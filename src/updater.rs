@@ -3,7 +3,7 @@ use {
         protocol::{Command, Status},
         traits::{FirmwareDevice, FirmwareVersion, UpdateService},
     },
-    embedded_hal_async::delay::DelayUs,
+    embedded_hal_async::delay::DelayNs,
     futures::{
         future::{select, Either},
         pin_mut,
@@ -85,7 +85,7 @@ where
         }
     }
 
-    async fn check<F: FirmwareDevice, D: DelayUs>(
+    async fn check<F: FirmwareDevice, D: DelayNs>(
         &mut self,
         device: &mut F,
         delay: &mut D,
@@ -208,7 +208,7 @@ where
     /// 1) The device is in sync, in which case `DeviceStatus::Synced` is returned.
     /// 2) The device is updated, in which case `DeviceStatus::Updated` is returned. It is the responsibility
     ///    of called to reset the device in order to run the new firmware.
-    pub async fn run<F: FirmwareDevice, D: DelayUs>(
+    pub async fn run<F: FirmwareDevice, D: DelayNs>(
         &mut self,
         device: &mut F,
         delay: &mut D,
@@ -228,7 +228,11 @@ mod tests {
 
     pub struct TokioDelay;
 
-    impl embedded_hal_async::delay::DelayUs for TokioDelay {
+    impl embedded_hal_async::delay::DelayNs for TokioDelay {
+        async fn delay_ns(&mut self, i: u32) {
+            tokio::time::sleep(tokio::time::Duration::from_nanos(i as u64)).await;
+        }
+
         async fn delay_us(&mut self, i: u32) {
             tokio::time::sleep(tokio::time::Duration::from_micros(i as u64)).await;
         }

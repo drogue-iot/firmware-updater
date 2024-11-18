@@ -1,7 +1,3 @@
-#![cfg_attr(feature = "nightly", feature(type_alias_impl_trait))]
-#![cfg_attr(feature = "nightly", feature(async_fn_in_trait))]
-#![cfg_attr(feature = "nightly", allow(incomplete_features))]
-
 use {
     embedded_update::{device, service, FirmwareUpdater},
     tokio::sync::mpsc,
@@ -89,7 +85,11 @@ impl embedded_io_async::Write for Link {
 
 pub struct Timer;
 
-impl embedded_hal_async::delay::DelayUs for Timer {
+impl embedded_hal_async::delay::DelayNs for Timer {
+    async fn delay_ns(&mut self, i: u32) {
+        tokio::time::sleep(tokio::time::Duration::from_nanos(i as u64)).await;
+    }
+
     async fn delay_us(&mut self, i: u32) {
         tokio::time::sleep(tokio::time::Duration::from_micros(i as u64)).await;
     }
